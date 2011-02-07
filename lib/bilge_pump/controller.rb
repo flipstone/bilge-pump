@@ -1,4 +1,4 @@
-module BilgeBump
+module BilgePump
   module Controller
     def self.included(mod)
       mod.respond_to :html

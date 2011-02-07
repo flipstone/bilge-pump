@@ -1,5 +1,2 @@
-module Bilge
-  module Pump
-    # Your code goes here...
-  end
-end
+require 'bilge_pump/controller'
+require 'bilge_pump/specs'

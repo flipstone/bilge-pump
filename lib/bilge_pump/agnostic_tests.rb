@@ -117,7 +117,9 @@ module BilgePump
 
     def create_scoped_models
       @scoped_models = model_scope.inject([]) do |list, model_name|
-        list + [Factory(model_name, association_attributes(list.last))]
+        m = Factory(model_name, association_attributes(list.last))
+        instance_variable_set("@#{model_name}", m)
+        list + [m]
       end
     end
 

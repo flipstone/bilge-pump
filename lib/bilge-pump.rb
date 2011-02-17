@@ -1,3 +1,4 @@
+require 'bilge_pump/options'
 require 'bilge_pump/controller'
 require 'bilge_pump/agnostic_tests'
 require 'bilge_pump/specs'

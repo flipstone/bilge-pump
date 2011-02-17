@@ -2,72 +2,90 @@ module BilgePump
   module AgnosticTests
     def self.included(mod)
       mod.extend ClassMethods
+      options = mod.bilge_pump_options
+
       mod.class_eval do
         bilge_setup do
           create_scoped_models
         end
 
-        bilge_test "index works" do
-          ms = (1..2).map { create_model }
-          get :index, association_parameters
-          bilge_assert_response :success
-          bilge_assert_includes assigns(collection_assign_name), ms.first
-          bilge_assert_includes assigns(collection_assign_name), ms.last
+        options.testing :index do
+          bilge_test "index works" do
+            ms = (1..2).map { create_model }
+            get :index, association_parameters
+            bilge_assert_response :success
+            bilge_assert_includes assigns(collection_assign_name), ms.first
+            bilge_assert_includes assigns(collection_assign_name), ms.last
+          end
         end
 
-        bilge_test "new works" do
-          get :new, association_parameters
-          bilge_assert_response :success
-          bilge_assert_new_record item_assign_name
+        options.testing :new do
+          bilge_test "new works" do
+            get :new, association_parameters
+            bilge_assert_response :success
+            bilge_assert_new_record item_assign_name
+          end
         end
 
-        bilge_test "create works" do
-          post :create, association_parameters.merge(
-            model_param_name => Factory.attributes_for(model_factory_name,
-                                                       attributes_for_create)
-          )
-          bilge_assert_response :redirect
+        options.testing :create do
+          bilge_test "create works" do
+            post :create, association_parameters.merge(
+              model_param_name => Factory.attributes_for(model_factory_name,
+                                                         attributes_for_create)
+            )
+            bilge_assert_response :redirect
 
-          created_model = created_model_scope.order('id').last
-          bilge_assert_model_attributes attributes_for_create, created_model
+            created_model = created_model_scope.order('id').last
+            bilge_assert_model_attributes attributes_for_create, created_model
+          end
         end
 
-        bilge_test "edit works" do
-          m = create_model
-          get :edit, association_parameters.merge(id: m.to_param)
-          bilge_assert_response :success
-          bilge_assert_equal m, assigns(item_assign_name)
+        options.testing :edit do
+          bilge_test "edit works" do
+            m = create_model
+            get :edit, association_parameters.merge(id: m.to_param)
+            bilge_assert_response :success
+            bilge_assert_equal m, assigns(item_assign_name)
+          end
         end
 
-        bilge_test "update works" do
-          m = create_model
-          post :update, association_parameters.merge(
-            id: m.to_param, model_param_name => attributes_for_update
-          )
+        options.testing :update do
+          bilge_test "update works" do
+            m = create_model
+            post :update, association_parameters.merge(
+              id: m.to_param, model_param_name => attributes_for_update
+            )
 
-          bilge_assert_response :redirect
-          bilge_assert_model_attributes attributes_for_update, m.reload
+            bilge_assert_response :redirect
+            bilge_assert_model_attributes attributes_for_update, m.reload
+          end
         end
 
-        bilge_test "show works" do
-          m = create_model
+        options.testing :show do
+          bilge_test "show works" do
+            m = create_model
 
-          get :show, association_parameters.merge(id: m.to_param)
-          bilge_assert_response :success
-          bilge_assert_equal m, assigns(model_factory_name)
+            get :show, association_parameters.merge(id: m.to_param)
+            bilge_assert_response :success
+            bilge_assert_equal m, assigns(model_factory_name)
+          end
         end
 
-        bilge_test "destroy works" do
-          m = create_model
+        options.testing :destroy do
+          bilge_test "destroy works" do
+            m = create_model
 
-          delete :destroy, association_parameters.merge(id: m.to_param)
-          bilge_assert_response :redirect
-          bilge_refute_existence m
+            delete :destroy, association_parameters.merge(id: m.to_param)
+            bilge_assert_response :redirect
+            bilge_refute_existence m
+          end
         end
       end
     end
 
     module ClassMethods
+      include OptionsSupport
+
       def model_class
         controller_class.name.sub(/Controller\Z/,'').singularize.constantize
       end

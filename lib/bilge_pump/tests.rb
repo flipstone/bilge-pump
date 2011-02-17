@@ -1,4 +1,8 @@
 module BilgePump
+  def self.Tests(options)
+    module_with_options Tests, options
+  end
+
   module Tests
     def bilge_assert_new_record(item_assign_name)
       assert assigns(item_assign_name).new_record?

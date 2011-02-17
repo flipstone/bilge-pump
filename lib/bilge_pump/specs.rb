@@ -1,4 +1,8 @@
 module BilgePump
+  def self.Specs(options)
+    module_with_options Specs, options
+  end
+
   module Specs
     def bilge_assert_response(expected_response)
       response.should send("be_#{expected_response}")

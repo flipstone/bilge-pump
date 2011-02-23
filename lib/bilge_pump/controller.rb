@@ -18,7 +18,7 @@ module BilgePump
     end
 
     def show
-      respond_with_assign item_assign_name, model_scope.find(params[:id])
+      respond_with_assign item_assign_name, model_scope.find_by_param(params[:id])
     end
 
     def create
@@ -26,7 +26,9 @@ module BilgePump
     end
 
     def update
-      respond_with_assign item_assign_name, model_scope.update(params[:id], params[model_param_name])
+      model = model_scope.find_by_param params[:id]
+      model.update_attributes params[model_param_name]
+      respond_with_assign item_assign_name, model
     end
 
     def new
@@ -34,11 +36,11 @@ module BilgePump
     end
 
     def edit
-      respond_with_assign item_assign_name, model_scope.find(params[:id])
+      respond_with_assign item_assign_name, model_scope.find_by_param(params[:id])
     end
 
     def destroy
-      respond_with_assign item_assign_name, model_scope.find(params[:id]).destroy
+      respond_with_assign item_assign_name, model_scope.find_by_param(params[:id]).destroy
     end
 
     protected
@@ -87,7 +89,7 @@ module BilgePump
 
     def find_scoped_model(scoping_model, model_scope)
       model_class = model_scope.to_s.classify.constantize
-      scope_for_find(scoping_model, model_class).find params["#{model_scope}_id"]
+      scope_for_find(scoping_model, model_class).find_by_param params["#{model_scope}_id"]
     end
 
     module ClassMethods

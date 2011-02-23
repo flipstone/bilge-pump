@@ -65,7 +65,7 @@ module BilgePump
 
     def respond_with_assign(assignment, model_or_models)
       instance_variable_set "@#{assignment}", model_or_models
-      respond_with(@scoping_models + [model_or_models])
+      respond_with(*(@scoping_models + [model_or_models]))
     end
 
     def find_scoping_models

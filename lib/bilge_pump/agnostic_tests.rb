@@ -178,8 +178,9 @@ module BilgePump
 
     def bilge_assert_model_attributes(attributes_to_assert, model)
       names = attributes_to_assert.keys.map(&:to_s)
-      attributes = model.attributes.select { |k,v| names.include?(k) }
-
+      attributes = Hash.new
+      names.each { |n| attributes[n] = model.send n }
+      
       bilge_assert_equal attributes_to_assert.stringify_keys, attributes
     end
   end

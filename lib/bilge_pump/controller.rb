@@ -74,8 +74,8 @@ module BilgePump
       @scoping_models = self.class.model_scope.inject([]) do |list, scope|
         list + [find_scoped_model(list.last, scope)]
       end
-      @scoping_models.each do |model|
-        instance_variable_set "@#{model.class.model_name.singular}", model
+      self.class.model_scope.zip(@scoping_models.each) do |scope_name, model|
+        instance_variable_set "@#{scope_name}", model
       end
     end
 

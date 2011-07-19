@@ -8,5 +8,3 @@ Feature: RSpec Support
     And I have included BilgePump::Specs in an describe block
     When I run the specs
     Then They should all pass
-
-

@@ -4,6 +4,8 @@ module BilgePump
   end
 
   module Controller
+    include ModelLocation
+
     def self.included(mod)
       mod.respond_to :html
       mod.extend ClassMethods
@@ -18,7 +20,7 @@ module BilgePump
     end
 
     def show
-      respond_with_assign item_assign_name, model_scope.find_by_param(params[:id])
+      respond_with_assign item_assign_name, find_model(model_scope, params[:id])
     end
 
     def create
@@ -26,7 +28,7 @@ module BilgePump
     end
 
     def update
-      model = model_scope.find_by_param params[:id]
+      model = find_model model_scope, params[:id]
       model.update_attributes params[model_param_name]
       respond_with_assign item_assign_name, model
     end
@@ -36,11 +38,11 @@ module BilgePump
     end
 
     def edit
-      respond_with_assign item_assign_name, model_scope.find_by_param(params[:id])
+      respond_with_assign item_assign_name, find_model(model_scope,params[:id])
     end
 
     def destroy
-      respond_with_assign item_assign_name, model_scope.find_by_param(params[:id]).destroy
+      respond_with_assign item_assign_name, find_model(model_scope,params[:id]).destroy
     end
 
     protected
@@ -89,7 +91,9 @@ module BilgePump
 
     def find_scoped_model(scoping_model, model_scope)
       model_class = model_scope.to_s.classify.constantize
-      scope_for_find(scoping_model, model_class).find_by_param params["#{model_scope}_id"]
+
+      find_model scope_for_find(scoping_model, model_class),
+                 params["#{model_scope}_id"]
     end
 
     module ClassMethods

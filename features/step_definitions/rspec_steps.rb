@@ -11,6 +11,7 @@ Before do
 
     require 'rack'
     require 'rails'
+    require 'active_record'
     require 'action_controller'
     require 'action_mailer' # to satisfy RSpec::Rails::MailerExampleGroup
     require 'bilge-pump'
@@ -66,6 +67,15 @@ Given /^I have included BilgePump::Specs in an describe block$/ do
       def attributes_for_update
         { name: "Baz" }
       end
+    end
+  end_code
+end
+
+Given /^the model supports only find_by_param$/ do
+  @source_code << <<-end_code
+    Foo.singleton_class.class_eval do
+      alias_method :find_by_param, :find
+      private :find
     end
   end_code
 end

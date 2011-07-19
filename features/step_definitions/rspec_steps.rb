@@ -76,7 +76,7 @@ When /^I run the specs$/ do
     f.write @source_code
     path = f.path
   end
-  @output = `rspec #{path} 2>&1`
+  @output = `BUNDLE_GEMFILE='' BUNDLE_BIN_PATH='' RUBYOPT='' rspec #{path} 2>&1`
   @result = $?
 end
 

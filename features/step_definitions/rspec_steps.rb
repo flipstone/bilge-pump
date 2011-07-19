@@ -11,7 +11,6 @@ Before do
 
     require 'rack'
     require 'rails'
-    require 'active_record'
     require 'action_controller'
     require 'action_mailer' # to satisfy RSpec::Rails::MailerExampleGroup
     require 'bilge-pump'
@@ -27,6 +26,17 @@ Before do
       resources :foos
     end
 
+    Factory.define :foo do |f|
+      f.name "Foo"
+    end
+
+  end_code
+end
+
+Given /^I am using ActiveRecord$/ do
+  @source_code << <<-end_code
+    require 'active_record'
+
     ActiveRecord::Base.establish_connection({
       adapter: 'sqlite3',
       database: '#{Tempfile.new('bilge-pump-feature-db').path}'
@@ -38,10 +48,22 @@ Before do
 
     class Foo < ActiveRecord::Base; end
 
-    Factory.define :foo do |f|
-      f.name "Foo"
-    end
+  end_code
+end
 
+Given /^I am using MongoMapper$/ do
+  @source_code << <<-end_code
+    require 'mongo_mapper'
+    MongoMapper.database = 'bilge-pump-feature-db'
+    MongoMapper.database.connection.drop_database 'bilge-pump-feature-db'
+
+    class Foo
+      include MongoMapper::Document
+
+      key :name, String
+
+      scope :scoped
+    end
   end_code
 end
 

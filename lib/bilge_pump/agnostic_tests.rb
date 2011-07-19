@@ -35,7 +35,7 @@ module BilgePump
             )
             bilge_assert_response :redirect
 
-            created_model = created_model_scope.order('id').last
+            created_model = created_model_scope.last
             bilge_assert_model_attributes attributes_for_create, created_model
           end
         end

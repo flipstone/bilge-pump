@@ -21,7 +21,7 @@ module BilgePump
     end
 
     def bilge_refute_existence(m)
-      model_class.should_not be_exists(m.id)
+      model_class.find_by_id(m.id).should be_nil
     end
 
     def self.included(mod)

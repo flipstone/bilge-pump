@@ -42,7 +42,9 @@ module BilgePump
     end
 
     def destroy
-      respond_with_assign item_assign_name, find_model(model_scope,params[:id]).destroy
+      model = find_model(model_scope,params[:id])
+      model.destroy
+      respond_with_assign item_assign_name, model
     end
 
     protected

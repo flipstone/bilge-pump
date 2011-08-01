@@ -24,10 +24,17 @@ Before do
 
     BilgePumpTestApp::Application.routes.draw do
       resources :foos
+      resources :bars do
+        resources :foos
+      end
     end
 
     Factory.define :foo do |f|
       f.name "Foo"
+    end
+
+    Factory.define :bar do |f|
+      f.name "foo"
     end
 
   end_code
@@ -43,10 +50,15 @@ Given /^I am using ActiveRecord$/ do
     })
 
     ActiveRecord::Base.connection.execute <<-end_ddl
-      CREATE TABLE foos(id INTEGER PRIMARY KEY ASC, name VARCHAR(255))
+      CREATE TABLE bars(id INTEGER PRIMARY KEY ASC, name VARCHAR(255))
+    end_ddl
+
+    ActiveRecord::Base.connection.execute <<-end_ddl
+      CREATE TABLE foos(id INTEGER PRIMARY KEY ASC, name VARCHAR(255), bar_id INTEGER)
     end_ddl
 
     class Foo < ActiveRecord::Base; end
+    class Bar < ActiveRecord::Base; end
 
   end_code
 end
@@ -57,15 +69,30 @@ Given /^I am using MongoMapper$/ do
     MongoMapper.database = 'bilge-pump-feature-db'
     MongoMapper.database.connection.drop_database 'bilge-pump-feature-db'
 
+    MongoMapper::Document.plugin BilgePump::MongoMapper::Document
+
+    class Bar
+      include MongoMapper::Document
+
+      key :name, String
+    end
+
     class Foo
       include MongoMapper::Document
 
       key :name, String
-
-      scope :scoped
+      key :bar_id, ObjectId
     end
   end_code
 end
+
+Given /^It has a belongs_to relationship$/ do
+  @source_code << <<-end_code
+    Foo.class_eval { belongs_to :bar }
+    Bar.class_eval { has_many :foos }
+  end_code
+end
+
 
 Given /^I have included BilgePump::Controller in a controller$/ do
   @source_code << <<-end_code
@@ -77,10 +104,21 @@ Given /^I have included BilgePump::Controller in a controller$/ do
   end_code
 end
 
+Given /^I have declared model scope$/ do
+  @model_scope = "[:bar]"
+  @source_code << <<-end_code
+    FoosController.class_eval do
+      model_scope #{@model_scope}
+    end
+  end_code
+end
+
+
 Given /^I have included BilgePump::Specs in an describe block$/ do
   @source_code << <<-end_code
     describe FoosController, type: :controller do
       include BilgePump::Specs
+      #{"model_scope #{@model_scope}" if @model_scope}
 
       def attributes_for_create
         { name: "Bar" }

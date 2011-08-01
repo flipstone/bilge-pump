@@ -16,3 +16,22 @@ Feature: RSpec Support
     And I have included BilgePump::Specs in an describe block
     When I run the specs
     Then They should all pass
+
+  Scenario: Specs pass on nested controller (ActiveRecord)
+    Given I am using ActiveRecord
+    And It has a belongs_to relationship
+    And I have included BilgePump::Controller in a controller
+    And I have declared model scope
+    And I have included BilgePump::Specs in an describe block
+    When I run the specs
+    Then They should all pass
+
+  Scenario: Specs pass on nested controller (MongoMapper)
+    Given I am using MongoMapper
+    And It has a belongs_to relationship
+    And I have included BilgePump::Controller in a controller
+    And I have declared model scope
+    And I have included BilgePump::Specs in an describe block
+    When I run the specs
+    Then They should all pass
+

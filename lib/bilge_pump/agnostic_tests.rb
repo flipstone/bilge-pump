@@ -129,12 +129,10 @@ module BilgePump
       []
     end
 
-    def all_scoped_models
-      model_base_scope + @scoped_models
-    end
-
     def create_scoped_models
-      @scoped_models = model_scope.inject([]) do |list, model_name|
+      @scoped_models = model_scope.inject([]) do |list, options|
+        model_name = options.is_a?(Hash) ? options.keys.first : options
+
         m = Factory(model_name, association_attributes(list.last))
         instance_variable_set("@#{model_name}", m)
         list + [m]
@@ -142,8 +140,12 @@ module BilgePump
     end
 
     def create_model
-      attributes_with_associations = all_scoped_models.inject(attributes_for_create) do |attributes, model|
+      attributes_with_base_scope = model_base_scope.inject(attributes_for_create) do |attributes, model|
         attributes.merge association_attributes(model)
+      end
+
+      attributes_with_associations = @scoped_models.zip(model_scope).inject(attributes_for_create) do |attributes, (model, options)|
+        attributes.merge association_attributes(model, options)
       end
 
       Factory model_factory_name, attributes_with_associations
@@ -164,9 +166,12 @@ module BilgePump
       end
     end
 
-    def association_attributes(model)
+    def association_attributes(model, options = {})
       if model
-        { model.class.model_name.element => model }
+        model_name_from_options = options.is_a?(Hash) ? options.values.first : nil
+        model_name = model_name_from_options || model.class.model_name.element
+
+        {  model_name => model }
       else
         {}
       end

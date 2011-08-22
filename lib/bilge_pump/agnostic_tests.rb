@@ -86,8 +86,9 @@ module BilgePump
     module ClassMethods
       include OptionsSupport
 
-      def model_class
-        controller_class.name.sub(/Controller\Z/,'').singularize.constantize
+      def model_class(value_to_set = nil)
+        @model_class = value_to_set if value_to_set
+        @model_class || controller_class.name.sub(/Controller\Z/,'').singularize.constantize
       end
 
       def singular_model_name

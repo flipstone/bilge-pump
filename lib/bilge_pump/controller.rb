@@ -50,7 +50,7 @@ module BilgePump
     protected
 
     def model_class
-      self.class.name.sub(/Controller\Z/, '').singularize.constantize
+      self.class.model_class
     end
 
     def model_scope
@@ -105,6 +105,11 @@ module BilgePump
         @model_scope ||= []
         @model_scope = scope unless scope == :not_passed
         @model_scope
+      end
+
+      def model_class(value_to_set = nil)
+        @model_class = value_to_set if value_to_set
+        @model_class || name.sub(/Controller\Z/, '').singularize.constantize
       end
     end
   end

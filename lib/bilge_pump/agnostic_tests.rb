@@ -30,8 +30,7 @@ module BilgePump
         options.testing :create do
           bilge_test "create works" do
             post :create, association_parameters.merge(
-              model_param_name => Factory.attributes_for(model_factory_name,
-                                                         attributes_for_create)
+              model_param_name => parameters_for_create
             )
             bilge_assert_response :redirect
 
@@ -53,7 +52,7 @@ module BilgePump
           bilge_test "update works" do
             m = create_model
             post :update, association_parameters.merge(
-              id: m.to_param, model_param_name => attributes_for_update
+              id: m.to_param, model_param_name => parameters_for_update
             )
 
             bilge_assert_response :redirect
@@ -178,19 +177,27 @@ module BilgePump
       end
     end
 
+    def parameters_for_create
+      Factory.attributes_for model_factory_name, attributes_for_create
+    end
+
     def attributes_for_create
       raise "#{self.class} must implement attributes_for_create for BilgePump"
     end
 
+    def parameters_for_update
+      attributes_for_update
+    end
+
     def attributes_for_update
-      raise "#{self.class} must implement attributes_for_create for BilgePump"
+      raise "#{self.class} must implement attributes_for_update for BilgePump"
     end
 
     def bilge_assert_model_attributes(attributes_to_assert, model)
       names = attributes_to_assert.keys.map(&:to_s)
       attributes = Hash.new
       names.each { |n| attributes[n] = model.send n }
-      
+
       bilge_assert_equal attributes_to_assert.stringify_keys, attributes
     end
   end

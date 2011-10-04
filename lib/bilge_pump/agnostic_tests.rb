@@ -11,7 +11,7 @@ module BilgePump
 
         options.testing :index do
           bilge_test "index works" do
-            ms = (1..2).map { create_model }
+            ms = (1..2).map { create_model(:index) }
             get :index, association_parameters
             bilge_assert_response :success
             bilge_assert_includes assigns(collection_assign_name), ms.first
@@ -41,7 +41,7 @@ module BilgePump
 
         options.testing :edit do
           bilge_test "edit works" do
-            m = create_model
+            m = create_model(:edit)
             get :edit, association_parameters.merge(id: m.to_param)
             bilge_assert_response :success
             bilge_assert_equal m, assigns(item_assign_name)
@@ -50,7 +50,7 @@ module BilgePump
 
         options.testing :update do
           bilge_test "update works" do
-            m = create_model
+            m = create_model(:create)
             post :update, association_parameters.merge(
               id: m.to_param, model_param_name => parameters_for_update
             )
@@ -62,7 +62,7 @@ module BilgePump
 
         options.testing :show do
           bilge_test "show works" do
-            m = create_model
+            m = create_model(:show)
 
             get :show, association_parameters.merge(id: m.to_param)
             bilge_assert_response :success
@@ -72,7 +72,7 @@ module BilgePump
 
         options.testing :destroy do
           bilge_test "destroy works" do
-            m = create_model
+            m = create_model(:destroy)
 
             delete :destroy, association_parameters.merge(id: m.to_param)
             bilge_assert_response :redirect
@@ -139,16 +139,20 @@ module BilgePump
       end
     end
 
-    def create_model
-      attributes_with_base_scope = model_base_scope.inject(attributes_for_create) do |attributes, model|
-        attributes.merge association_attributes(model)
-      end
-
-      attributes_with_associations = @scoped_models.zip(model_scope).inject(attributes_for_create) do |attributes, (model, options)|
+    def create_model(action = :create)
+      attributes_with_associations = @scoped_models.zip(model_scope).inject(attributes_for_action(action)) do |attributes, (model, options)|
         attributes.merge association_attributes(model, options)
       end
 
       Factory model_factory_name, attributes_with_associations
+    end
+
+    def attributes_for_action(action)
+      if respond_to?("attributes_for_#{action}")
+        send "attributes_for_#{action}"
+      else
+        attributes_for_create
+      end
     end
 
     def association_parameters

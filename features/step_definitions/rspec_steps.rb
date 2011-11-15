@@ -3,7 +3,7 @@ require 'tempfile'
 
 Before do
   @source_code = <<-end_code
-    gem 'rack', '~> 1.2'
+    gem 'rack', '~> 1.2.1'
     gem 'rails', '3.0.4'
     gem 'rspec-rails', '~> 2.4'
     gem 'factory_girl', '~> 1.3'

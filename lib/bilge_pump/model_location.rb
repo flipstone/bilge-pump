@@ -1,4 +1,6 @@
 module ModelLocation
+  protected
+
   def find_model(scope, selector)
     if scope.respond_to?(:find_by_param)
       scope.find_by_param selector

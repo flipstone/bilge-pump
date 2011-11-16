@@ -3,10 +3,6 @@ require 'tempfile'
 
 Before do
   @source_code = <<-end_code
-    gem 'rack', '~> 1.2.1'
-    gem 'rails', '3.0.4'
-    gem 'rspec-rails', '~> 2.4'
-    gem 'factory_girl', '~> 1.3'
     $LOAD_PATH << "#{File.expand_path(File.join(File.dirname(__FILE__), %w(.. .. lib)))}"
 
     require 'rack'
@@ -146,7 +142,7 @@ When /^I run the specs$/ do
     f.write @source_code
     path = f.path
   end
-  @output = `BUNDLE_GEMFILE='' BUNDLE_BIN_PATH='' RUBYOPT='' rspec #{path} 2>&1`
+  @output = `BUNDLE_GEMFILE='' BUNDLE_BIN_PATH='' RUBYOPT='' bundle exec rspec #{path} 2>&1`
   @result = $?
 end
 

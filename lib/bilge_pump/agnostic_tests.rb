@@ -111,9 +111,17 @@ module BilgePump
           define_method(:model_scope) { scope }
         end
       end
+
+      def model_factories
+        @model_factories ||= {}
+      end
+
+      def model_factory(name, &block)
+        model_factories[name.to_s] = block
+      end
     end
 
-    (ClassMethods.instance_methods - [:model_scope]).each do |m|
+    (ClassMethods.instance_methods - [:model_scope, :model_factory]).each do |m|
       class_eval %{
         def #{m}(*args)
           self.class.#{m} *args
@@ -137,7 +145,7 @@ module BilgePump
       @scoped_models = model_scope.inject([]) do |list, options|
         model_name = options.is_a?(Hash) ? options.keys.first : options
 
-        m = Factory(model_name, association_attributes(list.last))
+        m = bilge_create model_name, association_attributes(list.last)
         instance_variable_set("@#{model_name}", m)
         list + [m]
       end
@@ -148,7 +156,15 @@ module BilgePump
         attributes.merge association_attributes(model, options)
       end
 
-      Factory model_factory_name, attributes_with_associations
+      bilge_create model_factory_name, attributes_with_associations
+    end
+
+    def bilge_create(name, attributes)
+      if factory = model_factories[name.to_s]
+        instance_exec attributes, &factory
+      else
+        Factory name, attributes
+      end
     end
 
     def attributes_for_action(action)

@@ -6,6 +6,7 @@ module BilgePump
 
       mod.class_eval do
         bilge_setup do
+          request.accept = options.mime_type
           create_scoped_models
         end
 
@@ -34,7 +35,7 @@ module BilgePump
             post :create, association_parameters.merge(
               model_param_name => parameters_for_create
             )
-            bilge_assert_response :redirect
+            bilge_assert_redirect options
 
             new_items = created_model_scope.all
 
@@ -59,7 +60,7 @@ module BilgePump
               id: m.to_param, model_param_name => parameters_for_update
             )
 
-            bilge_assert_response :redirect
+            bilge_assert_redirect options
             bilge_assert_model_attributes attributes_for_update, m.reload
           end
         end
@@ -79,7 +80,7 @@ module BilgePump
             m = create_model(:destroy)
 
             delete :destroy, association_parameters.merge(id: m.to_param)
-            bilge_assert_response :redirect
+            bilge_assert_redirect options
             bilge_refute_existence m
           end
         end
@@ -215,6 +216,14 @@ module BilgePump
 
     def attributes_for_update
       raise "#{self.class} must implement attributes_for_update for BilgePump"
+    end
+
+    def bilge_assert_redirect(options)
+      if options.redirecting_format?
+        bilge_assert_response :redirect
+      else
+        bilge_assert_response :success
+      end
     end
 
     def bilge_assert_model_attributes(attributes_to_assert, model)

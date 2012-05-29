@@ -17,6 +17,18 @@ module BilgePump
         []
       end
     end
+
+    def format
+      @o[:format] || :html
+    end
+
+    def redirecting_format?
+      format == :html
+    end
+
+    def mime_type
+      Mime::Type.lookup_by_extension(format).to_s
+    end
   end
 
   module OptionsSupport

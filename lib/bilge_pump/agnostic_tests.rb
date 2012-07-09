@@ -30,14 +30,14 @@ module BilgePump
 
         options.testing :create do
           bilge_test "create works" do
-            original_items = created_model_scope.all
+            original_items = created_model_scope.all.to_a
 
             post :create, association_parameters.merge(
               model_param_name => parameters_for_create
             )
             bilge_assert_redirect options
 
-            new_items = created_model_scope.all
+            new_items = created_model_scope.all.to_a
 
             created_model = (new_items - original_items).first
             bilge_assert_model_attributes attributes_for_create, created_model

@@ -153,11 +153,12 @@ module BilgePump
     end
 
     def create_model(action = :create)
-      attributes_with_associations = @scoped_models.zip(model_scope).inject(attributes_for_action(action)) do |attributes, (model, options)|
-        attributes.merge association_attributes(model, options)
-      end
+      parent = @scoped_models.last
+      options = model_scope.last
+      assoc_attrs = parent ? association_attributes(parent, options) : {}
+      attrs = attributes_for_action(action)
 
-      bilge_create model_factory_name, attributes_with_associations
+      bilge_create model_factory_name, attrs.merge(assoc_attrs)
     end
 
     def bilge_create(name, attributes)

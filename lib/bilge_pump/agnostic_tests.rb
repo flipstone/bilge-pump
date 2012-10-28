@@ -13,7 +13,7 @@ module BilgePump
         options.testing :index do
           bilge_test "index works" do
             ms = (1..2).map { create_model(:index) }
-            get :index, association_parameters
+            get :index, base_parameters
             bilge_assert_response :success
             bilge_assert_includes assigns(collection_assign_name), ms.first
             bilge_assert_includes assigns(collection_assign_name), ms.last
@@ -22,7 +22,7 @@ module BilgePump
 
         options.testing :new do
           bilge_test "new works" do
-            get :new, association_parameters
+            get :new, base_parameters
             bilge_assert_response :success
             bilge_assert_new_record item_assign_name
           end
@@ -32,7 +32,7 @@ module BilgePump
           bilge_test "create works" do
             original_items = created_model_scope.all.to_a
 
-            post :create, association_parameters.merge(
+            post :create, base_parameters.merge(
               model_param_name => parameters_for_create
             )
             bilge_assert_redirect options
@@ -47,7 +47,7 @@ module BilgePump
         options.testing :edit do
           bilge_test "edit works" do
             m = create_model(:edit)
-            get :edit, association_parameters.merge(id: m.to_param)
+            get :edit, base_parameters.merge(id: m.to_param)
             bilge_assert_response :success
             bilge_assert_equal m, assigns(item_assign_name)
           end
@@ -56,7 +56,7 @@ module BilgePump
         options.testing :update do
           bilge_test "update works" do
             m = create_model(:create)
-            post :update, association_parameters.merge(
+            post :update, base_parameters.merge(
               id: m.to_param, model_param_name => parameters_for_update
             )
 
@@ -69,7 +69,7 @@ module BilgePump
           bilge_test "show works" do
             m = create_model(:show)
 
-            get :show, association_parameters.merge(id: m.to_param)
+            get :show, base_parameters.merge(id: m.to_param)
             bilge_assert_response :success
             bilge_assert_equal m, assigns(model_factory_name)
           end
@@ -79,7 +79,7 @@ module BilgePump
           bilge_test "destroy works" do
             m = create_model(:destroy)
 
-            delete :destroy, association_parameters.merge(id: m.to_param)
+            delete :destroy, base_parameters.merge(id: m.to_param)
             bilge_assert_redirect options
             bilge_refute_existence m
           end
@@ -119,6 +119,14 @@ module BilgePump
 
       def model_factory(name, &block)
         model_factories[name.to_s] = block
+      end
+
+      def format(arg = nil)
+        if arg
+          @format = arg
+        else
+          @forgmat
+        end
       end
     end
 
@@ -175,6 +183,10 @@ module BilgePump
       else
         attributes_for_create
       end
+    end
+
+    def base_parameters
+      association_parameters.merge(:format => format)
     end
 
     def association_parameters

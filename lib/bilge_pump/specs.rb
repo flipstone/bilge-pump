@@ -4,6 +4,10 @@ module BilgePump
   end
 
   module Specs
+    def bilge_assert_response_code(code)
+      response.code.should == code
+    end
+
     def bilge_assert_response(expected_response)
       response.should send("be_#{expected_response}")
     end

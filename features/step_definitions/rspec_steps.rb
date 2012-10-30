@@ -100,6 +100,16 @@ Given /^I have included BilgePump::Controller in a controller$/ do
   end_code
 end
 
+Given /^I have included BilgePump::Controller in a json controller$/ do
+  @source_code << <<-end_code
+    class FoosController < ActionController::Base
+      include Rails.application.routes.url_helpers
+      respond_to :json
+      include BilgePump::Controller
+    end
+  end_code
+end
+
 Given /^I have declared model scope$/ do
   @model_scope = "[:bar]"
   @source_code << <<-end_code
@@ -115,6 +125,22 @@ Given /^I have included BilgePump::Specs in an describe block$/ do
     describe FoosController, type: :controller do
       include BilgePump::Specs
       #{"model_scope #{@model_scope}" if @model_scope}
+
+      def attributes_for_create
+        { name: "Bar" }
+      end
+
+      def attributes_for_update
+        { name: "Baz" }
+      end
+    end
+  end_code
+end
+
+Given /^I have included BilgePump::Specs in an describe block for json format$/ do
+  @source_code << <<-end_code
+    describe FoosController, type: :controller do
+      include BilgePump::Specs format: :json
 
       def attributes_for_create
         { name: "Bar" }

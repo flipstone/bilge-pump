@@ -1,3 +1,5 @@
+require_relative 'bilge_pump/assertions/html'
+require_relative 'bilge_pump/assertions/json'
 require_relative 'bilge_pump/options'
 require_relative 'bilge_pump/model_location'
 require_relative 'bilge_pump/controller'

@@ -22,6 +22,16 @@ module BilgePump
       @o[:format] || :html
     end
 
+    def format_assertions
+      @o[:format_assertions] ||
+      case format.to_s
+      when 'html' then Assertions::Html
+      when 'json' then Assertions::Json
+      else raise "No format_assertions default for #{format}. Please specify a module for format_assertions option."
+      end
+
+    end
+
     def redirecting_format?
       format == :html
     end

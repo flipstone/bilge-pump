@@ -3,6 +3,7 @@ module BilgePump
     def self.included(mod)
       mod.extend ClassMethods
       options = mod.bilge_pump_options
+      mod.send :include, options.format_assertions
 
       mod.class_eval do
         bilge_setup do
@@ -14,17 +15,14 @@ module BilgePump
           bilge_test "index works" do
             ms = (1..2).map { create_model(:index) }
             get :index, base_parameters
-            bilge_assert_response :success
-            bilge_assert_includes assigns(collection_assign_name), ms.first
-            bilge_assert_includes assigns(collection_assign_name), ms.last
+            bilge_assert_index_response collection_assign_name, ms
           end
         end
 
         options.testing :new do
           bilge_test "new works" do
             get :new, base_parameters
-            bilge_assert_response :success
-            bilge_assert_new_record item_assign_name
+            bilge_assert_new_response item_assign_name
           end
         end
 
@@ -35,12 +33,14 @@ module BilgePump
             post :create, base_parameters.merge(
               model_param_name => parameters_for_create
             )
-            bilge_assert_redirect options
 
             new_items = created_model_scope.all.to_a
 
             created_model = (new_items - original_items).first
-            bilge_assert_model_attributes attributes_for_create, created_model
+
+            bilge_assert_create_response options,
+                                         attributes_for_create,
+                                         created_model
           end
         end
 
@@ -48,8 +48,7 @@ module BilgePump
           bilge_test "edit works" do
             m = create_model(:edit)
             get :edit, base_parameters.merge(id: m.to_param)
-            bilge_assert_response :success
-            bilge_assert_equal m, assigns(item_assign_name)
+            bilge_assert_edit_response m, item_assign_name
           end
         end
 
@@ -60,8 +59,9 @@ module BilgePump
               id: m.to_param, model_param_name => parameters_for_update
             )
 
-            bilge_assert_redirect options
-            bilge_assert_model_attributes attributes_for_update, m.reload
+            bilge_assert_update_response options,
+                                         attributes_for_update,
+                                         m.reload
           end
         end
 
@@ -70,8 +70,8 @@ module BilgePump
             m = create_model(:show)
 
             get :show, base_parameters.merge(id: m.to_param)
-            bilge_assert_response :success
-            bilge_assert_equal m, assigns(model_factory_name)
+
+            bilge_assert_show_response m, item_assign_name
           end
         end
 
@@ -80,8 +80,8 @@ module BilgePump
             m = create_model(:destroy)
 
             delete :destroy, base_parameters.merge(id: m.to_param)
-            bilge_assert_redirect options
-            bilge_refute_existence m
+
+            bilge_assert_destroy_response options, m
           end
         end
       end
@@ -119,14 +119,6 @@ module BilgePump
 
       def model_factory(name, &block)
         model_factories[name.to_s] = block
-      end
-
-      def format(arg = nil)
-        if arg
-          @format = arg
-        else
-          @forgmat
-        end
       end
     end
 
@@ -186,7 +178,7 @@ module BilgePump
     end
 
     def base_parameters
-      association_parameters.merge(:format => format)
+      association_parameters.merge(:format => bilge_pump_options.format.to_s)
     end
 
     def association_parameters
@@ -229,14 +221,6 @@ module BilgePump
 
     def attributes_for_update
       raise "#{self.class} must implement attributes_for_update for BilgePump"
-    end
-
-    def bilge_assert_redirect(options)
-      if options.redirecting_format?
-        bilge_assert_response :redirect
-      else
-        bilge_assert_response :success
-      end
     end
 
     def bilge_assert_model_attributes(attributes_to_assert, model)

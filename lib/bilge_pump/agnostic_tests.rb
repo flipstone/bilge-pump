@@ -165,7 +165,7 @@ module BilgePump
       if factory = model_factories[name.to_s]
         instance_exec attributes, &factory
       else
-        Factory name, attributes
+        ::BilgePump::Factory.create name, attributes
       end
     end
 
@@ -208,7 +208,7 @@ module BilgePump
     end
 
     def parameters_for_create
-      Factory.attributes_for model_factory_name, attributes_for_create
+      BilgePump::Factory.attributes_for model_factory_name, attributes_for_create
     end
 
     def attributes_for_create

@@ -2,6 +2,9 @@ require 'rspec/expectations'
 require 'tempfile'
 
 Before do
+  @gemfile_path = File.expand_path(File.join(File.dirname(__FILE__),
+                                             '..', '..',
+                                             'Gemfile-factory_girl-1.3'))
   @source_code = <<-end_code
     $LOAD_PATH << "#{File.expand_path(File.join(File.dirname(__FILE__), %w(.. .. lib)))}"
 
@@ -25,15 +28,33 @@ Before do
       end
     end
 
-    Factory.define :foo do |f|
-      f.name "Foo"
-    end
+    if defined? ::Factory
+      Factory.define :foo do |f|
+        f.name "Foo"
+      end
 
-    Factory.define :bar do |f|
-      f.name "foo"
+      Factory.define :bar do |f|
+        f.name "foo"
+      end
+    else
+      FactoryGirl.define do
+        factory :foo do
+          name "Foo"
+        end
+
+        factory :bar do
+          name "foo"
+        end
+      end
     end
 
   end_code
+end
+
+Given /^I am using gem (\S+) version (\S+)$/ do |name, version|
+  @gemfile_path = File.expand_path(File.join(File.dirname(__FILE__),
+                                             '..', '..',
+                                             "Gemfile-#{name}-#{version}"))
 end
 
 Given /^I am using ActiveRecord$/ do
@@ -168,7 +189,12 @@ When /^I run the specs$/ do
     f.write @source_code
     path = f.path
   end
-  @output = `BUNDLE_GEMFILE='' BUNDLE_BIN_PATH='' RUBYOPT='' bundle exec rspec #{path} 2>&1`
+  @output = `BUNDLE_GEMFILE='#{@gemfile_path}'
+             BUNDLE_BIN_PATH=''
+             RUBYOPT=''
+             bundle install &&
+             bundle exec rspec #{path} 2>&1`
+
   @result = $?
 end
 

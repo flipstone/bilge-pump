@@ -27,7 +27,7 @@ class Foo < ActiveRecord::Base
 end
 
 Given /^ModelLocation is included$/ do
-  extend ModelLocation
+  extend BilgePump::ModelLocation
 end
 
 Given /^I have created a model$/ do

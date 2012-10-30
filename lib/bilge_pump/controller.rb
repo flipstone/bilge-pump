@@ -1,8 +1,4 @@
 module BilgePump
-  def self.Controller(options)
-    module_with_options Controller, options
-  end
-
   module Controller
     include ModelLocation
 

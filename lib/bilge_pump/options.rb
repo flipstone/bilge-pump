@@ -41,14 +41,6 @@ module BilgePump
     end
   end
 
-  module OptionsSupport
-    def bilge_pump_options
-      super
-    rescue NoMethodError
-      Options.new
-    end
-  end
-
   def self.module_with_options(mod_with_options, options)
     Module.new do
       @options = options

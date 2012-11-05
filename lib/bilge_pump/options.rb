@@ -40,17 +40,4 @@ module BilgePump
       Mime::Type.lookup_by_extension(format).to_s
     end
   end
-
-  def self.module_with_options(mod_with_options, options)
-    Module.new do
-      @options = options
-      @mod_with_options = mod_with_options
-
-      def self.included(mod)
-        mod.singleton_class.class_eval { attr_accessor :bilge_pump_options }
-        mod.bilge_pump_options = Options.new(@options)
-        mod.send :include, @mod_with_options
-      end
-    end
-  end
 end

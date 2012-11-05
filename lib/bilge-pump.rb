@@ -19,6 +19,19 @@ module BilgePump
   def self.Specs(options)
     module_with_options Specs, options
   end
+
+  def self.module_with_options(mod_with_options, options)
+    Module.new do
+      @options = options
+      @mod_with_options = mod_with_options
+
+      def self.included(mod)
+        mod.singleton_class.class_eval { attr_accessor :bilge_pump_options }
+        mod.bilge_pump_options = Options.new(@options)
+        mod.send :include, @mod_with_options
+      end
+    end
+  end
 end
 
 
